@@ -13,32 +13,34 @@ def load_model():
 
 model = load_model()
 
-EXPECTED_COLS = ["Time"] + [f"V{i}" for i in range(1, 29)] + ["Amount"]
-
-st.sidebar.header("Settings")
-threshold = st.sidebar.slider("Fraud threshold", 0.01, 0.99, 0.50, 0.01)
-
-uploaded = st.file_uploader("Upload a CSV (Time, V1..V28, Amount)", type=["csv"])
-
-if not uploaded:
-    st.info("Upload a CSV to begin. If you use the Kaggle dataset, keep columns: Time, V1..V28, Amount.")
-    st.stop()
-
-df = pd.read_csv(uploaded)
-
 # If the file contains the label column, drop it for prediction
 if "Class" in df.columns:
     df = df.drop(columns=["Class"])
 
-st.subheader("Data preview")
-st.dataframe(df.head(20), use_container_width=True)
+# Normalize column names to strings
+df.columns = [str(c) for c in df.columns]
 
-missing = [c for c in EXPECTED_COLS if c not in df.columns]
+# Use the exact feature names the model was trained on (prevents mismatch errors)
+model_expected_cols = None
+if hasattr(model, "feature_names_in_"):
+    model_expected_cols = list(model.feature_names_in_)
+
+# Fallback to full Kaggle schema if feature_names_in_ is not available
+fallback_cols = ["Time"] + [f"V{i}" for i in range(1, 29)] + ["Amount"]
+required_cols = model_expected_cols if model_expected_cols else fallback_cols
+
+missing = [c for c in required_cols if c not in df.columns]
 if missing:
-    st.error(f"Missing required columns: {missing}")
+    st.error(
+        "Your uploaded CSV does not match the columns this trained model expects.\n\n"
+        f"Missing required columns: {missing}\n\n"
+        "Tip: Upload the Kaggle creditcard.csv file, and do not rename columns."
+    )
     st.stop()
 
-X = df[EXPECTED_COLS].copy()
+# Select and order columns exactly as expected by the model
+X = df[required_cols].copy()
+
 
 if hasattr(model, "predict_proba"):
     proba = model.predict_proba(X)[:, 1]
