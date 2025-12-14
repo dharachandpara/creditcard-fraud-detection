@@ -2,10 +2,12 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="🛡️", layout="wide")
-
 st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="fraud_icon.png", layout="wide")
-st.title("Credit Card Fraud Detection")
+c1, c2 = st.columns([1, 10])
+with c1:
+    st.image("fraud_icon.png", width=60)
+with c2:
+    st.title("Credit Card Fraud Detection")
 
 @st.cache_resource
 def load_model():
