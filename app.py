@@ -27,9 +27,6 @@ if uploaded is None:
 # Read CSV
 df = pd.read_csv(uploaded)
 
-max_rows = st.sidebar.number_input("Max rows to score", min_value=100, max_value=50000, value=5000, step=100)
-df = df.head(int(max_rows))
-
 
 # If label exists, drop it
 if "Class" in df.columns:
