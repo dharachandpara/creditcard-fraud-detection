@@ -4,8 +4,8 @@ import joblib
 
 st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="🛡️", layout="wide")
 
-st.title("🛡️ Credit Card Fraud Detection")
-st.caption("Portfolio demo by Dhara Chandpara, upload transactions, score fraud probability, download results.")
+st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="fraud_icon.png", layout="wide")
+st.title("Credit Card Fraud Detection")
 
 @st.cache_resource
 def load_model():
