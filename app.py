@@ -2,12 +2,26 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="fraud_icon.png", layout="wide")
-c1, c2 = st.columns([1, 10])
-with c1:
-    st.image("fraud_icon.png", width=60)
-with c2:
-    st.title("Credit Card Fraud Detection")
+st.set_page_config(page_title="Credit Card Fraud Detection", page_icon="fraud_card_icon.png", layout="wide")
+import base64
+
+def img_to_base64(path: str) -> str:
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+icon_b64 = img_to_base64("fraud_card_icon.png")
+
+st.markdown(
+    f"""
+    <div style="display:flex; align-items:center; gap:16px; margin-top:10px;">
+        <img src="data:image/png;base64,{icon_b64}" style="width:52px; height:52px;" />
+        <div style="font-size:48px; font-weight:700; line-height:1;">
+            Credit Card Fraud Detection
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 @st.cache_resource
 def load_model():
