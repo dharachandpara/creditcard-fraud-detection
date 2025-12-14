@@ -67,6 +67,18 @@ out = df.copy()
 out["fraud_probability"] = proba
 out["fraud_pred"] = pred
 
+st.subheader("Flagged transactions")
+show_only_fraud = st.checkbox("Show only flagged fraud rows", value=True)
+
+flagged = out[out["fraud_pred"] == 1].copy()
+st.write(f"Flagged rows: {len(flagged)}")
+
+if show_only_fraud:
+    st.dataframe(flagged.head(200), use_container_width=True)
+else:
+    st.dataframe(out.head(200), use_container_width=True)
+
+
 st.subheader("Results")
 c1, c2, c3 = st.columns(3)
 c1.metric("Rows scored", len(out))
