@@ -13,38 +13,47 @@ def load_model():
 
 model = load_model()
 
-# If the file contains the label column, drop it for prediction
+# Sidebar controls
+st.sidebar.header("Settings")
+threshold = st.sidebar.slider("Fraud threshold", 0.0, 1.0, 0.50, 0.01)
+
+# Upload
+uploaded = st.file_uploader("Upload a CSV (Time, V1..V28, Amount)", type=["csv"])
+
+if uploaded is None:
+    st.info("Upload a CSV to begin. If you use the Kaggle dataset, keep columns: Time, V1..V28, Amount.")
+    st.stop()
+
+# Read CSV
+df = pd.read_csv(uploaded)
+
+# If label exists, drop it
 if "Class" in df.columns:
     df = df.drop(columns=["Class"])
 
-# Normalize column names to strings
+# Normalize column names
 df.columns = [str(c) for c in df.columns]
 
-# Use the exact feature names the model was trained on (prevents mismatch errors)
-model_expected_cols = None
-if hasattr(model, "feature_names_in_"):
-    model_expected_cols = list(model.feature_names_in_)
-
-# Fallback to full Kaggle schema if feature_names_in_ is not available
+# Determine expected column order
 fallback_cols = ["Time"] + [f"V{i}" for i in range(1, 29)] + ["Amount"]
-required_cols = model_expected_cols if model_expected_cols else fallback_cols
+expected_cols = list(model.feature_names_in_) if hasattr(model, "feature_names_in_") else fallback_cols
 
-missing = [c for c in required_cols if c not in df.columns]
+missing = [c for c in expected_cols if c not in df.columns]
 if missing:
     st.error(
-        "Your uploaded CSV does not match the columns this trained model expects.\n\n"
+        "Your uploaded CSV does not match what this trained model expects.\n\n"
         f"Missing required columns: {missing}\n\n"
-        "Tip: Upload the Kaggle creditcard.csv file, and do not rename columns."
+        "Tip: Upload the Kaggle creditcard.csv file and do not rename columns."
     )
     st.stop()
 
-# Select and order columns exactly as expected by the model
-X = df[required_cols].copy()
+X = df[expected_cols].copy()
 
-
+# Predict probabilities
 if hasattr(model, "predict_proba"):
     proba = model.predict_proba(X)[:, 1]
 else:
+    # fallback if model does not support predict_proba
     proba = model.predict(X)
 
 pred = (proba >= threshold).astype(int)
@@ -69,4 +78,4 @@ st.download_button(
 )
 
 st.markdown("---")
-st.markdown("**Note:** This is a demo model for learning/portfolio purposes.")
+st.markdown("**Note:** Demo model for learning/portfolio purposes.")
