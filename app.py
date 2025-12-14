@@ -15,6 +15,10 @@ model = load_model()
 
 # Sidebar controls
 st.sidebar.header("Settings")
+st.sidebar.markdown("---")
+st.sidebar.subheader("About")
+st.sidebar.write("Model: Random Forest (trained on Kaggle ULB creditcard dataset).")
+st.sidebar.write("Output: fraud_probability + fraud_pred using selected threshold.")
 threshold = st.sidebar.slider("Fraud threshold", 0.0, 1.0, 0.50, 0.01)
 
 # Upload
